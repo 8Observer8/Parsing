@@ -45,6 +45,15 @@ std::vector <std::string> & CParsing::split(
     return result;
 }
 
+#include <iostream>
+
+void printArr(std::vector<std::string> v) {
+    for (std::size_t i = 0; i < v.size(); i++) {
+        std::cout << v[i] << std::endl;
+    }
+    std::cout << std::endl;
+}
+
 bool CParsing::parseData(std::string buffer) {
     //    buffer.replace("\r", "");
     //    m_buffer += buffer;
@@ -65,6 +74,10 @@ bool CParsing::parseData(std::string buffer) {
     //    }
     //    m_buffer = arr[arr.length - 1];
 
+    bool dataIsReady = false;
+    static bool RMCDataIsReady = false;
+    static bool GGADataIsReady = false;
+
     for (std::size_t i = 0; i < buffer.length(); i++) {
         if (buffer[i] == '\r') {
             buffer.erase(i, 1);
@@ -72,7 +85,8 @@ bool CParsing::parseData(std::string buffer) {
     }
     m_buffer += buffer;
     std::vector<std::string> bufferArr;
-    split(bufferArr, buffer, "\n");
+    split(bufferArr, m_buffer, "\n");
+    printArr(bufferArr);
 
     for (std::size_t i = 0; i < bufferArr.size() - 1; i++) {
         std::string packet = bufferArr[i];
@@ -84,20 +98,37 @@ bool CParsing::parseData(std::string buffer) {
         if (beginningOfPacket == "$GPRMC") {
             if (!setDataOfPacket_RMC(packet)) {
                 setValuesInZero();
+                RMCDataIsReady = false;
+                GGADataIsReady = false;
+                dataIsReady = false;
                 m_buffer.clear();
                 return false;
+            } else {
+                RMCDataIsReady = true;
             }
         } else if (beginningOfPacket == "$GPGGA") {
             if (!setDataOfPacket_GGA(packet)) {
                 setValuesInZero();
+                RMCDataIsReady = false;
+                GGADataIsReady = false;
+                dataIsReady = false;
                 m_buffer.clear();
                 return false;
+            } else {
+                GGADataIsReady = true;
             }
         }
     }
 
-    m_buffer.clear();
-    return true;
+    dataIsReady = RMCDataIsReady && GGADataIsReady;
+
+    if (dataIsReady) {
+        RMCDataIsReady = false;
+        GGADataIsReady = false;
+        m_buffer.clear();
+    }
+
+    return dataIsReady;
 }
 
 bool CParsing::setDataOfPacket_RMC(std::string packet) {

@@ -14,6 +14,7 @@ class newtestclass : public CPPUNIT_NS::TestFixture {
     CPPUNIT_TEST_SUITE(newtestclass);
 
     CPPUNIT_TEST(testParseData);
+    CPPUNIT_TEST(testParseData_partialBuffer);
 
     CPPUNIT_TEST_SUITE_END();
 
@@ -25,7 +26,7 @@ public:
 
 private:
     void testParseData();
-
+    void testParseData_partialBuffer();
 };
 
 #endif	/* NEWTESTCLASS_H */
