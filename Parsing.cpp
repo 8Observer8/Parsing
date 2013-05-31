@@ -86,6 +86,9 @@ bool CParsing::parseData(std::string buffer) {
     m_buffer += buffer;
     std::vector<std::string> bufferArr;
     split(bufferArr, m_buffer, "\n");
+    if (bufferArr[0][0] != '$') {
+        bufferArr.erase(bufferArr.begin());
+    }
     printArr(bufferArr);
 
     for (std::size_t i = 0; i < bufferArr.size() - 1; i++) {
